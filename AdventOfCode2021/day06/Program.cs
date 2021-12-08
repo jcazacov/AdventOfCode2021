@@ -19,27 +19,45 @@ namespace day06
             {
                 allFish.Add(Int32.Parse(fish));
             }
-
-            for (int days = 0; days < 256; days++)
+            
+            Dictionary<int, long> descendants = new Dictionary<int, long>();
+            for (int finalAge = 0; finalAge <= 256; finalAge++)
             {
-                Console.WriteLine(days);
-                int currentFishCount = allFish.Count;
-                for (int currentFish = 0; currentFish < currentFishCount; currentFish++)
+                descendants[finalAge] = 1;
+                if (finalAge >= 9)
                 {
-                    if (allFish[currentFish] == 0)
+                    for (int currentAge = finalAge - 9; currentAge >= 0; currentAge -= 7)
                     {
-                        allFish[currentFish] = 6;
-                        allFish.Add(8);
+                        descendants[finalAge] += descendants[currentAge];
                     }
-                    else
-                    {
-                        allFish[currentFish]--;
-                    }
-                    
+
+                    //descendants[finalAge]++;
                 }
             }
-            
-            Console.WriteLine(allFish.Count);
+
+            var result1 = countFishes(allFish,80, descendants);
+            Console.WriteLine(result1);
+            var result2 = countFishes(allFish,256, descendants);
+            Console.WriteLine(result2);
+        }
+
+        private static long countFishes(List<int> fishes, int days, Dictionary<int, long> descendants)
+        {
+            long result = 0;
+            foreach (var fish in fishes)
+            {
+                var age = days - fish - 1;
+                result += 1;
+
+                while (age >= 0)
+                {
+                    result += descendants[age];
+                    age -= 7;
+                }
+                //result += descendants[88 - fish];
+            }
+
+            return result;
         }
     }
 }
