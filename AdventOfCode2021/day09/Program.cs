@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace day09
@@ -26,17 +27,55 @@ namespace day09
         {
             int[][] heights = Read("Input.txt");
             int riskSum = 0;
+            List<int> basinSizes = new List<int>();
             for (int row = 0; row <heights.Length; row++)
             {
                 for (int column = 0; column < heights[0].Length; column++)
                 {
-                    riskSum += riskLevel(row, column, heights);
+                    
+                    if (isLow(row, column, heights))
+                    {
+                        riskSum += riskLevel(row, column, heights);
+                        basinSizes.Add(findBasinSize(row, column, heights, new List<string>()));
+                    }
                 }
             }
             Console.WriteLine(riskSum);
+
+            int largest1 = 0;
+            int largest2 = 0;
+            int largest3 = 0;
+            foreach (var basinSize in basinSizes)
+            {
+                if (basinSize > largest3)
+                {
+                    if (basinSize > largest2)
+                    {
+                        if (basinSize > largest1)
+                        {
+                            largest3 = largest2;
+                            largest2 = largest1;
+                            largest1 = basinSize;
+                        }
+                        else
+                        {
+                            largest3 = largest2;
+                            largest2 = basinSize;
+                        }
+                    }
+                    else
+                    {
+                        largest3 = basinSize;
+                    }
+                    
+                }
+                
+            }
+            
+            Console.WriteLine(largest1*largest2*largest3);
         }
         
-        public static int riskLevel(int row, int column, int[][] heights){
+        public static bool isLow(int row, int column, int[][] heights){
             int maxX = heights[0].Length - 1;
             int maxY = heights.Length - 1;
             
@@ -48,13 +87,41 @@ namespace day09
                     // waagrecht angrenzt.
                     if (heights[row][column] >= heights[currentRow][currentColumn] && (row == currentRow || column == currentColumn) && !(column == currentColumn && row == currentRow))
                     {
-                        return 0;
+                        return false;
                     }
                 }
             }
 
-            return heights[row][column] + 1;
+            return true;
         }
-        
+
+        public static int riskLevel(int row, int column, int[][] heights)
+        {
+            if (isLow(row, column, heights))
+            {
+                return heights[row][column] + 1;
+            }
+
+            return 0;
+        }
+
+        public static int findBasinSize(int y, int x, int[][] heights, List<string> partOfBasin)
+        {
+            int maxX = heights[0].Length - 1;
+            int maxY = heights.Length - 1;
+            if (x < 0 || x > maxX || y < 0 || y > maxY || heights[y][x] == 9 || partOfBasin.Contains("y"+(y)+"x"+(x)))
+            {
+                return 0;
+            }
+            else
+            {
+                partOfBasin.Add("y"+(y)+"x"+(x));
+                return 1 + findBasinSize(y-1, x, heights, partOfBasin) +
+                       findBasinSize(y+1, x, heights, partOfBasin) +
+                       findBasinSize(y, x-1, heights, partOfBasin) +
+                       findBasinSize(y, x+1, heights, partOfBasin);
+            }
+            
+        }
     }
 }
